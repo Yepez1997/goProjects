@@ -28,10 +28,22 @@ func returnAllArticles(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Articles)
 }
 
+func returnSingleArticle(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["id"]
+	fmt.Fprintf(w, "Key: "+key)
+	for _, article := range Articles {
+		if article.ID == key {
+			json.NewEncoder(w).Encode(article)
+		}
+	}
+}
+
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/", homePage)
-	myRouter.HandleFunc("/all", returnAllArticles)
+	myRouter.HandleFunc("/articles", returnAllArticles)
+	myRouter.HandleFunc("/article/{id}", returnSingleArticle)
 	log.Fatal(http.ListenAndServe(":5000", myRouter))
 
 }
