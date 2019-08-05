@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type Article struct {
@@ -27,13 +29,15 @@ func returnAllArticles(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRequests() {
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/articles", returnAllArticles)
-	log.Fatal(http.ListenAndServe(":5000", nil))
+	myRouter := mux.NewRouter().StrictSlash(true)
+	myRouter.HandleFunc("/", homePage)
+	myRouter.HandleFunc("/all", returnAllArticles)
+	log.Fatal(http.ListenAndServe(":5000", myRouter))
 
 }
 
 func main() {
+	fmt.Println("Rest API with Gorilla Mux")
 	Articles = []Article{
 		Article{ID: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
 		Article{ID: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
