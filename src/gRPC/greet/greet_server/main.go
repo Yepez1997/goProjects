@@ -16,6 +16,7 @@ type server struct{}
 func (*server) Greet(ctx context.Context, req *greetpb.GreetingRequest) (*greetpb.GreetingResponse, error) {
 	// create a message that the function was invoked
 	fmt.Printf("Greet function was invoked with %v", req)
+	// in other words get te buffer bytes 
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Hello " + firstName
 	// create new protobuffer request
