@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -23,7 +24,27 @@ func main() {
 
 	c := greetpb.NewGreetServiceClient(cc)
 
-	// place holder
-	fmt.Printf("Created a client, %f", c)
+	doUnaryGreet(c)
+}
+
+// doUnaryGreet - unary request -> unary response for greet service
+func doUnaryGreet(c greetpb.GreetServiceClient) {
+	// ideally should pass in first name and last name as a variable
+	// set up the request -> the object
+	req := &greetpb.GreetingRequest{
+		Greeting: &greetpb.Greeting{
+			FirstName: "Aureliano",
+			LastName:  "Yepez",
+		},
+	}
+
+	// call the greet function on the server
+	res, err := c.Greet(context.Background(), req)
+	// check for err
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+	// print the result
+	log.Printf("Response from Greet: %v", res.Result)
 
 }
