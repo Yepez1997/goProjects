@@ -1,0 +1,31 @@
+
+syntax = "proto3";
+package calculator;
+option go_package = "calculatorpb";
+
+// Calculate - api that takes two ints 
+message Calculate {
+    int32 first_int = 1;
+    int32 second_int  = 2;
+}
+
+// CalculateRequest - request object
+message CalculateRequest {
+    Calculate calculate = 1;
+}
+
+// CalculateResponse - response object 
+message CalculateResponse {
+    int32 result = 1;
+}
+
+// Calculator Services 
+service CalculateService {
+    // Unary API call 
+    rpc CalculateSum(CalculateRequest) returns (CalculateResponse) {};
+}
+
+
+
+
+
