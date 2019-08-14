@@ -2,14 +2,21 @@ package main
 
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net"
+
+	"github.com/Yepez1997/goProjects/src/gRPC/calculator/calculatorpb"
+	"google.golang.org/grpc"
 )
 
 // all services will bind to this struct 
 type server struct{}
+
+// TOOD IMPLEMENT THIS 
+func (*server) CalculateSum(ctx context.Context, req *calculatorpb.CalculateRequest) (*calculatorpb.CalculateResponse, error) {
+	return nil, nil
+}
 
 func main() {
 	fmt.Println("Listening to port 50051 ...")
