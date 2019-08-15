@@ -20,7 +20,7 @@ func (*server) CalculateSum(ctx context.Context, req *calculatorpb.CalculateRequ
 	firstNumber := req.GetCalculate().GetFirstInt()
 	secondNumber := req.GetCalculate().GetSecondInt()
 	result := firstNumber + secondNumber
-	// calculatepb response
+	// calculatepb response object
 	res := &calculatorpb.CalculateResponse{
 		Result: result,
 	}
