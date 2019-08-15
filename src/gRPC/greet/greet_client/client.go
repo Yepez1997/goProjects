@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"io"
 
 	"github.com/Yepez1997/goProjects/src/gRPC/greet/greetpb"
 	"google.golang.org/grpc"
@@ -14,7 +15,7 @@ func main() {
 	// create a connection to the server
 	// by def grpc has ssl
 	// once going in to production - remove
-	cc, err := grpc.Dial("localxwhost:50051", grpc.WithInsecure())
+	cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Could not connect %v", err)
 	}
@@ -24,7 +25,7 @@ func main() {
 
 	c := greetpb.NewGreetServiceClient(cc)
 
-	doUnaryGreet(c)
+	//doUnaryGreet(c)
 	doServerStreaming(c)
 }
 
@@ -55,14 +56,14 @@ func doUnaryGreet(c greetpb.GreetServiceClient) {
 func doServerStreaming(c greetpb.GreetServiceClient) {
 	fmt.Println("Starting to do a server stream RPC ...")
 	req := &greetpb.GreetManyTimesRequest{
-		Greeting: greetpb.Greeting{
+		Greeting: &greetpb.Greeting{
 			FirstName: "Aureliano",
 			LastName: "Yepez",
 		},
 	}
 	resStream, err := c.GreetManyTimes(context.Background(), req)
 	if err != nil {
-		log.Fatalf("Could not process response: %v", res)
+		log.Fatalf("Could not process response: %v", err)
 	}
 	// print the result 
 	// keep looping until you reach the end 
