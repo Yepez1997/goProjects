@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/Yepez1997/goProjects/src/gRPC/calculator/calculatorpb"
 	"google.golang.org/grpc"
 )
 
@@ -25,7 +26,7 @@ func main() {
 
 func doUnaryCalculateSum(c calculatorpb.CalculateServiceClient) {
 	// request to send
-	req := calculatorpb.CalculareRequest{
+	req := &calculatorpb.CalculateRequest{
 		Calculate: &calculatorpb.Calculate{
 			FirstInt:  10,
 			SecondInt: 3,

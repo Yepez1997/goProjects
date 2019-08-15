@@ -14,7 +14,7 @@ func main() {
 	// create a connection to the server
 	// by def grpc has ssl
 	// once going in to production - remove
-	cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	cc, err := grpc.Dial("localxwhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Could not connect %v", err)
 	}
