@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/Yepez1997/goProjects/src/gRPC/greet/greetpb"
 	"google.golang.org/grpc"
@@ -18,7 +19,7 @@ type server struct{}
 func (*server) Greet(ctx context.Context, req *greetpb.GreetingRequest) (*greetpb.GreetingResponse, error) {
 	// create a message that the function was invoked
 	fmt.Printf("Greet function was invoked with %v", req)
-	// in other words get te buffer bytes 
+	// in other words get te buffer bytes
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Hello " + firstName
 	// create new protobuffer request
@@ -29,16 +30,16 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetingRequest) (*greetp
 }
 
 func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
-	// get the name 
-	// iterate n times 
-	// create the response object 
-	// send the object to the stream 
-	// optional -> timeout 
+	// get the name
+	// iterate n times
+	// create the response object
+	// send the object to the stream
+	// optional -> timeout
 	fmt.Println("GreetManyTimes function was invoked: %v", req)
 	firstName := req.GetGreeting().GetFirstName()
 	for i := 0; i < 5; i++ {
 		msg := "Hello " + firstName + " " + strconv.Itoa(i)
-		res := &greetpb.GreetManyTimesResponse {
+		res := &greetpb.GreetManyTimesResponse{
 			Result: msg,
 		}
 		stream.Send(res)
@@ -46,6 +47,27 @@ func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb
 
 	}
 	return nil
+}
+
+func (*server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
+	fmt.Println("LongGreet function was invoked")
+	// result we are going to send back
+	result := ""
+	for {
+		msg, err := stream.Recv()
+		if err == io.EOF {
+			// END OF THE FILE
+			// NEED TO SEND BACK THE RESPONSE
+			return stream.SendAndClose(&greetpb.LongGreetResponse{Result: result})
+		}
+		if err != nil {
+			log.Fatalf("Error occured during the steam: %v", err)
+		}
+		// deserialize the request
+		firstName := msg.GetGreeting().GetFirstName()
+		result += "Hello " + firstName + "! "
+
+	}
 }
 
 func main() {
