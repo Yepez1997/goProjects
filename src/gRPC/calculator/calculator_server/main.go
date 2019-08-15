@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 	"context"
-	
+
 	"github.com/Yepez1997/goProjects/src/gRPC/calculator/calculatorpb"
 	"google.golang.org/grpc"
 )
@@ -16,7 +16,16 @@ type server struct{}
 
 // TOOD IMPLEMENT THIS 
 func (*server) CalculateSum(ctx context.Context, req *calculatorpb.CalculateRequest) (*calculatorpb.CalculateResponse, error) {
-	return nil, nil
+	fmt.Printf("Calcualte Sum function was invoked with: %v", req)
+	// look at pb def 
+	firstNumber := req.GetFirstInt()
+	secondNumber := req.GetSecondInt()
+	result := firstNumber + secondNumber
+	// calculatepb response 
+	res := &calculatepb.CalculateResponse{
+		Result: result,
+	}
+	return res, nil
 }
 
 func main() {
