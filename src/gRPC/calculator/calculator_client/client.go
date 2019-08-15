@@ -1,26 +1,33 @@
 package main
 
+import (
+	"context"
+	"fmt"
+	"log"
 
-func  main() {
+	"google.golang.org/grpc"
+)
+
+func main() {
 	fmt.Println("Calculator Client ...")
 
-	cc, err := gprc.Dial("localhost:50051", grpc.WithInsecure())
+	cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Could not connect %v", err)
 	}
-	// close the connection 
+	// close the connection
 	defer cc.Close()
 
-	c :=  calcalate.NewCalculateServiceClient(cc) 
+	c := calculatorpb.NewCalculateServiceClient(cc)
 
 	doUnaryCalculateSum(c)
 }
 
-func doUnaryCalculateSum(c calculatepb.CalculateServiceClient) {
-	// request to send 
-	req := calculatepb.CalculareRequest {
-		Calculate: &calculate.Calculate {
-			FirstInt: 10,
+func doUnaryCalculateSum(c calculatorpb.CalculateServiceClient) {
+	// request to send
+	req := calculatorpb.CalculareRequest{
+		Calculate: &calculatorpb.Calculate{
+			FirstInt:  10,
 			SecondInt: 3,
 		},
 	}
@@ -34,6 +41,5 @@ func doUnaryCalculateSum(c calculatepb.CalculateServiceClient) {
 
 	// print the result
 	log.Printf("Response from CalculateSum: %v", res.Result)
-
 
 }
