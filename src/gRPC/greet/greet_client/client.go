@@ -25,6 +25,7 @@ func main() {
 	c := greetpb.NewGreetServiceClient(cc)
 
 	doUnaryGreet(c)
+	doServerStreaming(c)
 }
 
 // doUnaryGreet - unary request -> unary response for greet service
@@ -43,8 +44,38 @@ func doUnaryGreet(c greetpb.GreetServiceClient) {
 	// check for err
 	if err != nil {
 		log.Fatalf("Error: %v", err)
-	}
+	}    
 	// print the result
 	log.Printf("Response from Greet: %v", res.Result)
+
+}
+
+
+// do Server streaming 
+func doServerStreaming(c greetpb.GreetServiceClient) {
+	fmt.Println("Starting to do a server stream RPC ...")
+	req := &greetpb.GreetManyTimesRequest{
+		Greeting: greetpb.Greeting{
+			FirstName: "Aureliano",
+			LastName: "Yepez",
+		},
+	}
+	resStream, err := c.GreetManyTimes(context.Background(), req)
+	if err != nil {
+		log.Fatalf("Could not process response: %v", res)
+	}
+	// print the result 
+	// keep looping until you reach the end 
+	for {
+		msg, err := resStream.Recv()	
+		if err == io.EOF {
+			// reached the end of the stream 
+			break
+		}
+		if err != nil {
+			log.Fatalf("error while reading the stream %v", err)
+		}
+		log.Printf("Response from Greet many times %v", msg.GetResult())
+	}
 
 }

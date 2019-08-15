@@ -34,6 +34,7 @@ func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb
 	// create the response object 
 	// send the object to the stream 
 	// optional -> timeout 
+	fmt.Println("GreetManyTimes function was invoked: %v", req)
 	firstName := req.GetGreeting().GetFirstName()
 	for i := 0; i < 5; i++ {
 		msg := "Hello" + firstName + " " + strconv.Itoa(i)
