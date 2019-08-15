@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"io"
 
 	"github.com/Yepez1997/goProjects/src/gRPC/calculator/calculatorpb"
 	"google.golang.org/grpc"
@@ -20,8 +21,8 @@ func main() {
 	defer cc.Close()
 
 	c := calculatorpb.NewCalculateServiceClient(cc)
-
-	doUnaryCalculateSum(c)
+	doServerPrimeStreaming(c)
+	//doUnaryCalculateSum(c)
 }
 
 func doUnaryCalculateSum(c calculatorpb.CalculateServiceClient) {
@@ -42,5 +43,41 @@ func doUnaryCalculateSum(c calculatorpb.CalculateServiceClient) {
 
 	// print the result
 	log.Printf("Response from CalculateSum: %v", res.Result)
+
+}
+
+
+
+func doServerPrimeStreaming(c calculatorpb.CalculateServiceClient) {
+	fmt.Println("Starting to do a server stream RPC ...")
+	// format the request 
+	req  := &calculatorpb.CalculateManyPrimesRequest{
+		Num: &calculatorpb.Number{
+			FirstNumber: 120,
+		},
+	}
+
+	resStream, err := c.CalculatePrimes(context.Background(), req)
+
+	if err != nil {
+		log.Fatalf("Could not process response: %v", err)
+	}
+
+	for {
+		msg, err := resStream.Recv()
+		// if at the end 
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			log.Fatalf("error while reading the stream %v", err)
+
+		}
+		// print response
+		log.Printf("Response from Greet many times %v", msg.GetResult())
+	}
+
+
 
 }

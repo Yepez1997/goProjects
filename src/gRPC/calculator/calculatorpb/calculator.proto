@@ -9,6 +9,10 @@ message Calculate {
     int32 second_int  = 2;
 }
 
+message Number {
+    int32 first_number = 1;
+}
+
 // CalculateRequest - request object
 message CalculateRequest {
     Calculate calculate = 1;
@@ -19,10 +23,24 @@ message CalculateResponse {
     int32 result = 1;
 }
 
+
+
+// stream server Request and Response Objects 
+message CalculateManyPrimesRequest {
+    Number num = 1;
+}
+
+message CalculateManyPrimesResponse {
+    int32 result = 1;
+}
+
 // Calculator Services 
 service CalculateService {
     // Unary API call 
     rpc CalculateSum(CalculateRequest) returns (CalculateResponse) {};
+
+    // server streaming 
+    rpc CalculatePrimes(CalculateManyPrimesRequest) returns (stream CalculateManyPrimesResponse) {}
 }
 
 
