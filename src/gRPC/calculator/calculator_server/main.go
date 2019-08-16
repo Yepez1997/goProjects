@@ -12,6 +12,8 @@ import (
 
 	"github.com/Yepez1997/goProjects/src/gRPC/calculator/calculatorpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // all services will bind to this struct
@@ -99,6 +101,22 @@ func (*server) CalculateAverage(stream calculatorpb.CalculateService_CalculateAv
 		totalSum += number
 		totalNum++
 	}
+}
+
+func (*server) SquareRoot(ctx context.Context, req *calculatorpb.SquareRootRequest) (*calculatorpb.SquareRootResponse, error) {
+	fmt.Println("Received Sqaure Root RPC ...")
+	number := req.GetNumber()
+	// raise the error here with the status code
+	if number < 0 {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			// sprint is string interpolation
+			fmt.Sprintf("Received a negative number: %v", number),
+		)
+	}
+	return &calculatorpb.SquareRootResponse{
+		Result: math.Sqrt(float64(number)),
+	}, nil
 }
 
 func main() {

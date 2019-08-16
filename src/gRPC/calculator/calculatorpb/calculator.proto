@@ -52,6 +52,15 @@ message CalculateMaxResponse {
     int64 result = 1;
 }
 
+// unnary request for square root 
+message SquareRootRequest {
+    int32 number = 1;
+}
+
+message SquareRootResponse {
+    double result = 1;
+}
+
 
 // Calculator Services 
 service CalculateService {
@@ -66,6 +75,11 @@ service CalculateService {
 
     // bidirectional streaming 
     rpc CalculateMax(stream CalculateMaxRequest) returns (stream CalculateMaxResponse) {}
+
+    // unary api call
+    // rpc will throw an exception if the number is negative
+    // the error thrown out is of type INVALID_ARGUEMENT 
+    rpc SquareRoot(SquareRootRequest) returns (SquareRootResponse) {}
 }
 
 

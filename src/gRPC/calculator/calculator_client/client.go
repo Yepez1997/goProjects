@@ -9,6 +9,8 @@ import (
 
 	"github.com/Yepez1997/goProjects/src/gRPC/calculator/calculatorpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func main() {
@@ -22,10 +24,12 @@ func main() {
 	defer cc.Close()
 
 	c := calculatorpb.NewCalculateServiceClient(cc)
-	//doServerPrimeStreaming(c)
-	//doUnaryCalculateSum(c)
+	// doServerPrimeStreaming(c)
+	// doUnaryCalculateSum(c)
 	// doClientStreaming(c)
-	doBidirectionalStreaming(c)
+	// doBidirectionalStreaming(c)
+	doUnaryErrorCall(c)
+
 }
 
 func doUnaryCalculateSum(c calculatorpb.CalculateServiceClient) {
@@ -184,4 +188,38 @@ func doBidirectionalStreaming(c calculatorpb.CalculateServiceClient) {
 
 	// block the program until everything is done
 	<-waitc
+}
+
+// do a unary call
+func doUnaryErrorCall(c calculatorpb.CalculateServiceClient) {
+	// correct call
+	doErrorCall(c, 10)
+	// error call
+	doErrorCall(c, -1)
+}
+
+func doErrorCall(c calculatorpb.CalculateServiceClient, num int32) {
+	res, err := c.SquareRoot(context.Background(), &calculatorpb.SquareRootRequest{
+		Number: num,
+	})
+	if err != nil {
+		sqrtErr, ok := status.FromError(err)
+		if ok {
+			// rpc err
+			fmt.Printf("Error message: %v\n", sqrtErr.Message())
+			fmt.Printf("Error Code: %v\n", sqrtErr.Code())
+			if sqrtErr.Code() == codes.InvalidArgument {
+				fmt.Println("Probably sent a negative number\n")
+				return
+			}
+
+		} else {
+			// infrastructure error
+			log.Fatalf("Big error occcured: %v\n", err)
+			return
+		}
+	}
+
+	fmt.Printf("SquareRoot Resposne: %v\n", res.GetResult())
+
 }
