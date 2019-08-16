@@ -27,6 +27,8 @@ message GreetManyTimesResponse {
     string result = 1;
 }
 
+
+// client side streaming 
 message LongGreetRequest {
     Greeting greeting = 1;
 }
@@ -34,6 +36,17 @@ message LongGreetRequest {
 message LongGreetResponse {
     string result = 1;
 }
+
+
+// bidirectional streaming 
+message GreetEveryoneRequest {
+    Greeting greeting = 1;
+}
+
+message GreetEveryoneResponse {
+    string result = 1;
+}
+
 
 service GreetService {
 
@@ -45,5 +58,8 @@ service GreetService {
 
     // client streaming 
     rpc LongGreet(stream LongGreetRequest) returns (LongGreetResponse) {}
+
+    // bidirectional streaming 
+    rpc GreetEveryone(stream GreetEveryoneRequest) returns (stream GreetEveryoneResponse) {}
 
 }

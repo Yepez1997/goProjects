@@ -83,7 +83,7 @@ func doServerPrimeStreaming(c calculatorpb.CalculateServiceClient) {
 // clientStreaming API for average api
 func doClientStreaming(c calculatorpb.CalculateServiceClient) {
 	// set up the requests
-	fmt.Println("Client Streaming API ... ")
+	fmt.Println("Client Streaming API ...")
 	// should spit out 4 from the server
 	requests := []*calculatorpb.CalculateAverageRequest{
 		&calculatorpb.CalculateAverageRequest{

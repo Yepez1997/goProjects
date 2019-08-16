@@ -16,6 +16,7 @@ import (
 // all services - added on needed basis
 type server struct{}
 
+// unary
 func (*server) Greet(ctx context.Context, req *greetpb.GreetingRequest) (*greetpb.GreetingResponse, error) {
 	// create a message that the function was invoked
 	fmt.Printf("Greet function was invoked with %v", req)
@@ -29,6 +30,7 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetingRequest) (*greetp
 	return res, nil
 }
 
+// server streaming
 func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
 	// get the name
 	// iterate n times
@@ -49,6 +51,7 @@ func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb
 	return nil
 }
 
+// client streaming
 func (*server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
 	fmt.Println("LongGreet function was invoked")
 	// result we are going to send back
@@ -66,6 +69,36 @@ func (*server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
 		// deserialize the request
 		firstName := msg.GetGreeting().GetFirstName()
 		result += "Hello " + firstName + "! "
+
+	}
+}
+
+// bidirectional streaming
+func (*server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) error {
+	// receive the message
+	// send the message back
+	// remember to check for errors
+	fmt.Println("Greet Everyone function was invoked")
+	for {
+		request, err := stream.Recv()
+		if err == io.EOF {
+			// no more streaming
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		// get the request
+		firstName := request.GetGreeting().GetFirstName()
+		result := "Hello " + firstName + "! "
+		// check for error and send back the response from that particular request
+		sendErr := stream.Send(&greetpb.GreetEveryoneResponse{
+			Result: result,
+		})
+		if sendErr != nil {
+			log.Fatalf("Error sending the data back from GreetEveryone Server: %v", err)
+			return err
+		}
 
 	}
 }

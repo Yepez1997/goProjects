@@ -402,7 +402,7 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type CalculateServiceClient interface {
-	// Unary API call
+	// unary API call
 	CalculateSum(ctx context.Context, in *CalculateRequest, opts ...grpc.CallOption) (*CalculateResponse, error)
 	// server streaming
 	CalculatePrimes(ctx context.Context, in *CalculateManyPrimesRequest, opts ...grpc.CallOption) (CalculateService_CalculatePrimesClient, error)
@@ -495,7 +495,7 @@ func (x *calculateServiceCalculateAverageClient) CloseAndRecv() (*CalculateAvera
 
 // CalculateServiceServer is the server API for CalculateService service.
 type CalculateServiceServer interface {
-	// Unary API call
+	// unary API call
 	CalculateSum(context.Context, *CalculateRequest) (*CalculateResponse, error)
 	// server streaming
 	CalculatePrimes(*CalculateManyPrimesRequest, CalculateService_CalculatePrimesServer) error
