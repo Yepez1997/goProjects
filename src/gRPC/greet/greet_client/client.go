@@ -26,9 +26,10 @@ func main() {
 
 	c := greetpb.NewGreetServiceClient(cc)
 
-	//doUnaryGreet(c)
+	// doUnaryGreet(c)
 	// doServerStreaming(c)
-	doClientStreaming(c)
+	// doClientStreaming(c)
+	doBidirectionalStreaming(c)
 }
 
 // doUnaryGreet - unary request -> unary response for greet service
@@ -121,4 +122,65 @@ func doServerStreaming(c greetpb.GreetServiceClient) {
 		log.Printf("Response from Greet many times %v", msg.GetResult())
 	}
 
+}
+
+// do BidirectionalStreaming - makes use of go routines
+func doBidirectionalStreaming(c greetpb.GreetServiceClient) {
+	fmt.Println("Starting to do a Bidirectional Stream RPC  ...\n")
+
+	// create a stream by invoking the client
+	stream, err := c.GreetEveryone(context.Background())
+	if err != nil {
+		log.Fatalf("Error occured receiving the stream in GreetEveryone: %v", err)
+	}
+
+	// the request we want to send
+	requests := []*greetpb.GreetEveryoneRequest{
+		&greetpb.GreetEveryoneRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Aureliano",
+			},
+		},
+		&greetpb.GreetEveryoneRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Adrian",
+			},
+		},
+		&greetpb.GreetEveryoneRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Alexander",
+			},
+		},
+	}
+
+	waitc := make(chan struct{})
+	// send a bunch of messages to the client in their own go routines
+	go func() {
+		// send every request
+		for _, req := range requests {
+			fmt.Printf("Sending Request: %v\n", req)
+			stream.Send(req)
+			time.Sleep(time.Millisecond)
+		}
+		// close the stream once done
+		stream.CloseSend()
+	}()
+	// receive a bunch of mesages from the client
+	go func() {
+		for {
+			req, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("Error in receiving stream: %v", err)
+				break
+			}
+			fmt.Printf("Response: %v\n", req.GetResult())
+		}
+		close(waitc)
+	}()
+
+	// block until everything is done
+	<-waitc
 }
