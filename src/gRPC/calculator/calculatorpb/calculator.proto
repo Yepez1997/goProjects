@@ -24,7 +24,6 @@ message CalculateResponse {
 }
 
 
-
 // stream server Request and Response Objects 
 message CalculateManyPrimesRequest {
     Number num = 1;
@@ -44,6 +43,16 @@ message CalculateAverageResponse {
     int64 result = 1;
 }
 
+// Bidirectional Streaming 
+message CalculateMaxRequest {
+    int64 number = 1;
+}
+
+message CalculateMaxResponse {
+    int64 result = 1;
+}
+
+
 // Calculator Services 
 service CalculateService {
     // unary API call 
@@ -54,6 +63,9 @@ service CalculateService {
 
     // client streaming 
     rpc CalculateAverage(stream CalculateAverageRequest) returns (CalculateAverageResponse) {}
+
+    // bidirectional streaming 
+    rpc CalculateMax(stream CalculateMaxRequest) returns (stream CalculateMaxResponse) {}
 }
 
 

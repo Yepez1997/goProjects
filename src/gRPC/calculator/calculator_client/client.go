@@ -24,7 +24,8 @@ func main() {
 	c := calculatorpb.NewCalculateServiceClient(cc)
 	//doServerPrimeStreaming(c)
 	//doUnaryCalculateSum(c)
-	doClientStreaming(c)
+	// doClientStreaming(c)
+	doBidirectionalStreaming(c)
 }
 
 func doUnaryCalculateSum(c calculatorpb.CalculateServiceClient) {
@@ -121,4 +122,66 @@ func doClientStreaming(c calculatorpb.CalculateServiceClient) {
 	}
 	fmt.Printf("CalculateAverage Response: %v", response)
 
+}
+
+// bidrectional streaming
+func doBidirectionalStreaming(c calculatorpb.CalculateServiceClient) {
+	// create stream by invoking the client
+	stream, err := c.CalculateMax(context.Background())
+	if err != nil {
+		log.Fatalf("Error invoking the stream: %v", err)
+	}
+	// form the request we want to send
+	requests := []*calculatorpb.CalculateMaxRequest{
+		&calculatorpb.CalculateMaxRequest{
+			Number: 1,
+		},
+		&calculatorpb.CalculateMaxRequest{
+			Number: 5,
+		},
+		&calculatorpb.CalculateMaxRequest{
+			Number: 3,
+		},
+		&calculatorpb.CalculateMaxRequest{
+			Number: 6,
+		},
+		&calculatorpb.CalculateMaxRequest{
+			Number: 2,
+		},
+		&calculatorpb.CalculateMaxRequest{
+			Number: 20,
+		},
+		// should get 1 5 6 20
+	}
+	// go channel used to block
+	waitc := make(chan struct{})
+	// send messages in a go routine
+	go func() {
+		for _, req := range requests {
+			fmt.Printf("Sending request: %v\n", req)
+			stream.Send(req)
+			time.Sleep(1000 * time.Millisecond)
+		}
+		// close the stream - done sending items
+		stream.CloseSend()
+	}()
+
+	// receive messages in a go routine from the client
+	go func() {
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("Error occured receiving a funcgtion call in CalculateMax: %v", err)
+				break
+			}
+			fmt.Printf("CalculateMax Response: %v\n", res.GetResult())
+		}
+		close(waitc)
+	}()
+
+	// block the program until everything is done
+	<-waitc
 }

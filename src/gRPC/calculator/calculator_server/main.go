@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net"
 
 	// "time"
@@ -49,6 +50,32 @@ func (*server) CalculatePrimes(req *calculatorpb.CalculateManyPrimesRequest, str
 		}
 	}
 	return nil
+}
+
+func (*server) CalculateMax(stream calculatorpb.CalculateService_CalculateMaxServer) error {
+	fmt.Printf("CalculateMax was invoked ...")
+	currentMax := math.Inf(-1)
+	// get the requests - onlt send the requets if the max is greater than the current max
+	for {
+		request, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			log.Fatalf("Error occured receiving stream in Calculate Max: %v", err)
+			return err
+		}
+		currentNumber := float64(request.GetNumber())
+		// send if condtion persists
+		if currentNumber > currentMax {
+			stream.Send(&calculatorpb.CalculateMaxResponse{
+				Result: int64(currentNumber),
+			})
+			// set new max
+			currentMax = float64(currentNumber)
+		}
+
+	}
 }
 
 func (*server) CalculateAverage(stream calculatorpb.CalculateService_CalculateAverageServer) error {
