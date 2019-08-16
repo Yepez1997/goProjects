@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"io"
+	"log"
+	"time"
 
 	"github.com/Yepez1997/goProjects/src/gRPC/calculator/calculatorpb"
 	"google.golang.org/grpc"
@@ -21,8 +22,9 @@ func main() {
 	defer cc.Close()
 
 	c := calculatorpb.NewCalculateServiceClient(cc)
-	doServerPrimeStreaming(c)
+	//doServerPrimeStreaming(c)
 	//doUnaryCalculateSum(c)
+	doClientStreaming(c)
 }
 
 func doUnaryCalculateSum(c calculatorpb.CalculateServiceClient) {
@@ -46,12 +48,10 @@ func doUnaryCalculateSum(c calculatorpb.CalculateServiceClient) {
 
 }
 
-
-
 func doServerPrimeStreaming(c calculatorpb.CalculateServiceClient) {
 	fmt.Println("Starting to do a server stream RPC ...")
-	// format the request 
-	req  := &calculatorpb.CalculateManyPrimesRequest{
+	// format the request
+	req := &calculatorpb.CalculateManyPrimesRequest{
 		Num: &calculatorpb.Number{
 			FirstNumber: 120,
 		},
@@ -65,7 +65,7 @@ func doServerPrimeStreaming(c calculatorpb.CalculateServiceClient) {
 
 	for {
 		msg, err := resStream.Recv()
-		// if at the end 
+		// if at the end
 		if err == io.EOF {
 			break
 		}
@@ -78,6 +78,47 @@ func doServerPrimeStreaming(c calculatorpb.CalculateServiceClient) {
 		log.Printf("Response from Greet many times %v", msg.GetResult())
 	}
 
+}
 
+// clientStreaming API for average api
+func doClientStreaming(c calculatorpb.CalculateServiceClient) {
+	// set up the requests
+	fmt.Println("Client Streaming API ... ")
+	// should spit out 4 from the server
+	requests := []*calculatorpb.CalculateAverageRequest{
+		&calculatorpb.CalculateAverageRequest{
+			Number: 4,
+		},
+		&calculatorpb.CalculateAverageRequest{
+			Number: 5,
+		},
+		&calculatorpb.CalculateAverageRequest{
+			Number: 3,
+		},
+		&calculatorpb.CalculateAverageRequest{
+			Number: 3,
+		},
+		&calculatorpb.CalculateAverageRequest{
+			Number: 5,
+		},
+	}
+
+	// get the stream
+	stream, err := c.CalculateAverage(context.Background())
+	if err != nil {
+		log.Fatalf("Error occuered in Calculate Average: %v", err)
+	}
+	for _, req := range requests {
+		fmt.Printf("Request: %v\n", req)
+		stream.Send(req)
+		time.Sleep(1000 * time.Millisecond)
+	}
+
+	// close the stream
+	response, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error occured in response for Calculate Averege: %v", err)
+	}
+	fmt.Printf("CalculateAverage Response: %v", response)
 
 }

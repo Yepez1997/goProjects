@@ -34,13 +34,26 @@ message CalculateManyPrimesResponse {
     int32 result = 1;
 }
 
+
+// Client Server Stream
+message CalculateAverageRequest {
+    int64 number = 1;
+}
+
+message CalculateAverageResponse {
+    int64 result = 1;
+}
+
 // Calculator Services 
 service CalculateService {
-    // Unary API call 
+    // unary API call 
     rpc CalculateSum(CalculateRequest) returns (CalculateResponse) {};
 
     // server streaming 
     rpc CalculatePrimes(CalculateManyPrimesRequest) returns (stream CalculateManyPrimesResponse) {}
+
+    // client streaming 
+    rpc CalculateAverage(stream CalculateAverageRequest) returns (CalculateAverageResponse) {}
 }
 
 

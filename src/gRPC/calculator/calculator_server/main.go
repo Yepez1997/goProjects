@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
+
 	// "time"
 
 	"github.com/Yepez1997/goProjects/src/gRPC/calculator/calculatorpb"
@@ -34,8 +36,8 @@ func (*server) CalculatePrimes(req *calculatorpb.CalculateManyPrimesRequest, str
 	number := req.GetNum().GetFirstNumber()
 	k := int32(2)
 	for number > 1 {
-		if number % k == 0 {
-			// build the object and send it 
+		if number%k == 0 {
+			// build the object and send it
 			res := &calculatorpb.CalculateManyPrimesResponse{
 				Result: int32(k),
 			}
@@ -47,6 +49,29 @@ func (*server) CalculatePrimes(req *calculatorpb.CalculateManyPrimesRequest, str
 		}
 	}
 	return nil
+}
+
+func (*server) CalculateAverage(stream calculatorpb.CalculateService_CalculateAverageServer) error {
+	fmt.Println("Calculate Average Function was invoked")
+	totalSum := int64(0)
+	totalNum := int64(0)
+	// go on forever until no more
+	for {
+		// receive stream
+		request, err := stream.Recv()
+		if err == io.EOF {
+			// done and send back response - client should call receive and close
+			return stream.SendAndClose(&calculatorpb.CalculateAverageResponse{
+				Result: int64(totalSum / totalNum),
+			})
+		}
+		if err != nil {
+			log.Fatalf("Error occured in CalculateAverage Stream: %v", err)
+		}
+		number := request.GetNumber()
+		totalSum += number
+		totalNum++
+	}
 }
 
 func main() {

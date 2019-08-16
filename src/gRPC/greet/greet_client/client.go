@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"io"
+	"log"
+	"time"
 
 	"github.com/Yepez1997/goProjects/src/gRPC/greet/greetpb"
 	"google.golang.org/grpc"
@@ -26,7 +27,8 @@ func main() {
 	c := greetpb.NewGreetServiceClient(cc)
 
 	//doUnaryGreet(c)
-	doServerStreaming(c)
+	// doServerStreaming(c)
+	doClientStreaming(c)
 }
 
 // doUnaryGreet - unary request -> unary response for greet service
@@ -45,32 +47,72 @@ func doUnaryGreet(c greetpb.GreetServiceClient) {
 	// check for err
 	if err != nil {
 		log.Fatalf("Error: %v", err)
-	}    
+	}
 	// print the result
 	log.Printf("Response from Greet: %v", res.Result)
 
 }
 
+// doClientStreaming - send many client streams (by default with http 2)
+func doClientStreaming(c greetpb.GreetServiceClient) {
+	// define the requests to send
+	// grab the stream and send all the requests to that stream
+	fmt.Println("Starting to do a client stream RPC ...")
+	requests := []*greetpb.LongGreetRequest{
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Aureliano",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Adrian",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Alexander",
+			},
+		},
+	}
+	// set up the requests
+	stream, err := c.LongGreet(context.Background())
+	if err != nil {
+		log.Fatalf("Error occured in LongGreet: %v", err)
+	}
+	for _, req := range requests {
+		fmt.Printf("Sending request: %v", req)
+		stream.Send(req)
+		time.Sleep(1000 * time.Millisecond)
+	}
 
-// do Server streaming 
+	// close the stream once done sending and receive the response
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error occured while closing the stream %v", err)
+	}
+	fmt.Printf("Long Greet response: %v", res)
+}
+
+// do Server streaming
 func doServerStreaming(c greetpb.GreetServiceClient) {
 	fmt.Println("Starting to do a server stream RPC ...")
 	req := &greetpb.GreetManyTimesRequest{
 		Greeting: &greetpb.Greeting{
 			FirstName: "Aureliano",
-			LastName: "Yepez",
+			LastName:  "Yepez",
 		},
 	}
 	resStream, err := c.GreetManyTimes(context.Background(), req)
 	if err != nil {
 		log.Fatalf("Could not process response: %v", err)
 	}
-	// print the result 
-	// keep looping until you reach the end 
+	// print the result
+	// keep looping until you reach the end
 	for {
-		msg, err := resStream.Recv()	
+		msg, err := resStream.Recv()
 		if err == io.EOF {
-			// reached the end of the stream 
+			// reached the end of the stream
 			break
 		}
 		if err != nil {
