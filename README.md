@@ -1,4 +1,4 @@
 # goProjects
-* gRPC 
+* gRPC (Remote Procedure Call)
 * Protocol Buffers 
 
