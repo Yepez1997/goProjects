@@ -1,0 +1,6 @@
+
+# ssl files to ignore 
+./src/gRPC/ssl/ca.key
+./src/gRPC/ssl/server.key
+./src/gRPC/ssl/server.pem
+./src/gRPC/ssl/server.crt
