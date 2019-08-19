@@ -9,6 +9,8 @@ import (
 
 	"github.com/Yepez1997/goProjects/src/gRPC/greet/greetpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func main() {
@@ -196,11 +198,28 @@ func doUnaryWithDeadline(c greetpb.GreetServiceClient) {
 			LastName: "Yepez",
 		}
 	}
-	ctx := context.Background()
+	// ctx := context.Background()
+	// pass in context with time out by default
+	ctc, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+	defer cancel()
 	// call the function 
 	res, err := greetpb.GreetWithDeadline(ctx, req)
 	if err != nil {
-		fmt.Println("Error in doUnaryWithDeadline, %v", err)
+		statusErr, ok := status.FromErr(err)
+		// recall if ok -> was grpc error 
+		// if the context is hit -> should handle in the error 
+		if ok {
+			// print out of error codes 
+			fmt.Println("Error message: %v", statusErr.Message())
+			fmt.Println("Error code: %v", statusErr.Code())
+			if statusErr.Code() ==  codes.DeadlineExceeded {
+				fmt.Println("Time out was hit; deadline was exceeded")
+			} else {
+				fmt.Println("Unexpected error: %v", statusError)
+			}
+		} else {
+				fmt.Println("Error in doUnaryWithDeadline, %v", err)
+		}
 	}
 	// print the results 
 	fmt.Println("Response UnaryWithDeadline: %v", res.GetResult())
