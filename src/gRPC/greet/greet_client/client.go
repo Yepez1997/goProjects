@@ -29,7 +29,9 @@ func main() {
 	// doUnaryGreet(c)
 	// doServerStreaming(c)
 	// doClientStreaming(c)
-	doBidirectionalStreaming(c)
+	// doBidirectionalStreaming(c)
+	doUnaryWithDeadline(c)
+
 }
 
 // doUnaryGreet - unary request -> unary response for greet service
@@ -183,4 +185,23 @@ func doBidirectionalStreaming(c greetpb.GreetServiceClient) {
 
 	// block until everything is done
 	<-waitc
+}
+// doUnaryWithDeadline - unary api call with deadline requests 
+func doUnaryWithDeadline(c greetpb.GreetServiceClient) {
+	fmt.Println("Starting to do a Unary RPC call with Deadline")
+	// define the rpc request 
+	req := &greetpb.GreetWithDeadlineRequest{
+		Greeting: &greetpb.Greeting{
+			FirstName: "Aureliano",
+			LastName: "Yepez",
+		}
+	}
+	ctx := context.Background()
+	// call the function 
+	res, err := greetpb.GreetWithDeadline(ctx, req)
+	if err != nil {
+		fmt.Println("Error in doUnaryWithDeadline, %v", err)
+	}
+	// print the results 
+	fmt.Println("Response UnaryWithDeadline: %v", res.GetResult())
 }
