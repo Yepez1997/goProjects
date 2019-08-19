@@ -32,7 +32,8 @@ func main() {
 	// doServerStreaming(c)
 	// doClientStreaming(c)
 	// doBidirectionalStreaming(c)
-	doUnaryWithDeadline(c)
+	//doUnaryWithDeadline(c, 5*time.Second) //	should complete
+	doUnaryWithDeadline(c, 1*time.Second) // should time out
 
 }
 
@@ -188,39 +189,40 @@ func doBidirectionalStreaming(c greetpb.GreetServiceClient) {
 	// block until everything is done
 	<-waitc
 }
-// doUnaryWithDeadline - unary api call with deadline requests 
-func doUnaryWithDeadline(c greetpb.GreetServiceClient) {
+
+// doUnaryWithDeadline - unary api call with deadline requests
+func doUnaryWithDeadline(c greetpb.GreetServiceClient, timeout time.Duration) {
 	fmt.Println("Starting to do a Unary RPC call with Deadline")
-	// define the rpc request 
+	// define the rpc request
 	req := &greetpb.GreetWithDeadlineRequest{
 		Greeting: &greetpb.Greeting{
 			FirstName: "Aureliano",
-			LastName: "Yepez",
-		}
+			LastName:  "Yepez",
+		},
 	}
 	// ctx := context.Background()
 	// pass in context with time out by default
-	ctc, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	// call the function 
-	res, err := greetpb.GreetWithDeadline(ctx, req)
+	// call the function
+	res, err := c.GreetWithDeadline(ctx, req)
 	if err != nil {
-		statusErr, ok := status.FromErr(err)
-		// recall if ok -> was grpc error 
-		// if the context is hit -> should handle in the error 
+		statusErr, ok := status.FromError(err)
+		// recall if ok -> was grpc error
+		// if the context is hit -> should handle in the error
 		if ok {
-			// print out of error codes 
-			fmt.Println("Error message: %v", statusErr.Message())
-			fmt.Println("Error code: %v", statusErr.Code())
-			if statusErr.Code() ==  codes.DeadlineExceeded {
-				fmt.Println("Time out was hit; deadline was exceeded")
+			// print out of error codes
+			fmt.Printf("Error message: %v\n", statusErr.Message())
+			fmt.Printf("Error code: %v\n", statusErr.Code())
+			if statusErr.Code() == codes.DeadlineExceeded {
+				fmt.Printf("Time out was hit; deadline was exceeded\n")
 			} else {
-				fmt.Println("Unexpected error: %v", statusError)
+				fmt.Printf("Unexpected error: %v\n", statusErr)
 			}
 		} else {
-				fmt.Println("Error in doUnaryWithDeadline, %v", err)
+			fmt.Printf("Error in doUnaryWithDeadline, %v\n", err)
 		}
 	}
-	// print the results 
-	fmt.Println("Response UnaryWithDeadline: %v", res.GetResult())
+	// print the results
+	fmt.Printf("Response UnaryWithDeadline: %v\n", res.GetResult())
 }
