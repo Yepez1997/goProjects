@@ -13,6 +13,7 @@ import (
 	"github.com/Yepez1997/goProjects/src/gRPC/calculator/calculatorpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -130,6 +131,9 @@ func main() {
 
 	// from .proto.go file
 	calculatorpb.RegisterCalculateServiceServer(s, &server{})
+
+	// reflection service
+	reflection.Register(s)
 
 	if err := s.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

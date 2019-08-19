@@ -151,6 +151,9 @@ func main() {
 	// the path to the protocol buffer
 	greetpb.RegisterGreetServiceServer(s, &server{})
 
+	// adding reflection service to the server
+	//reflection.Register(s)
+
 	if err := s.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
