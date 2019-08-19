@@ -10,6 +10,7 @@ import (
 	"github.com/Yepez1997/goProjects/src/gRPC/greet/greetpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
 
@@ -18,22 +19,28 @@ func main() {
 	// create a connection to the server
 	// by def grpc has ssl
 	// once going in to production - remove
-	cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	certFile := "../../ssl/ca.crt" // certificate authority trust cerificate
+	creds, err := credentials.NewClientTLSFromFile(certFile, "")
 	if err != nil {
-		log.Fatalf("Could not connect %v", err)
+		log.Fatalf("Error loading client certificate: %v", err)
+		return
 	}
-
+	cc, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(creds))
+	if err != nil {
+		log.Fatalf("Could not connect: %v", err)
+		return
+	}
 	// when whole main is done -> close the connection
 	defer cc.Close()
 
 	c := greetpb.NewGreetServiceClient(cc)
 
-	// doUnaryGreet(c)
+	doUnaryGreet(c)
 	// doServerStreaming(c)
 	// doClientStreaming(c)
 	// doBidirectionalStreaming(c)
 	//doUnaryWithDeadline(c, 5*time.Second) //	should complete
-	doUnaryWithDeadline(c, 1*time.Second) // should time out
+	//doUnaryWithDeadline(c, 1*time.Second) // should time out
 
 }
 
