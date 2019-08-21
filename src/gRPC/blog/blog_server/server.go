@@ -99,6 +99,15 @@ func (*server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*blog
 		)
 	}
 
+	return &blogpb.ReadBlogResponse{
+		Blog:  &blogpb.Blog{
+			Id: data.ID,
+			AuthorId: data.AuthorID,
+			Content: data.Content,
+			Title: data.Title,
+		}
+	}
+
 }
 
 func main() {
