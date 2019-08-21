@@ -95,18 +95,18 @@ func (*server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*blog
 	// reminds me of c
 	if err := res.Decode(data); err != nil {
 		return nil, status.Errorf(codes.NotFound,
-			fmt.Sprintf("Cannot find blog with the specified ID")
+			fmt.Sprintf("Cannot find blog with the specified ID"),
 		)
 	}
 
 	return &blogpb.ReadBlogResponse{
-		Blog:  &blogpb.Blog{
-			Id: data.ID,
+		Blog: &blogpb.Blog{
+			Id:       data.ID.Hex(),
 			AuthorId: data.AuthorID,
-			Content: data.Content,
-			Title: data.Title,
-		}
-	}
+			Content:  data.Content,
+			Title:    data.Title,
+		},
+	}, nil
 
 }
 
