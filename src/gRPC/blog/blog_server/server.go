@@ -26,9 +26,9 @@ type server struct{}
 // TODO: look over primitive type
 type blogItem struct {
 	ID       primitive.ObjectID `bson:"_id, omitempty"`
-	AuthorID string
-	Title    string
-	Content  string
+	AuthorID string             `bson:"_author_id"`
+	Title    string             `bson:"title"`
+	Content  string             `bson:"content"`
 }
 
 func main() {
@@ -37,6 +37,7 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	// connectiing to mongodb; client represents a client object ot mongodb
+	fmt.Println("Connecting to MongoDB ...")
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatalf("Error: %v", err)
@@ -44,12 +45,13 @@ func main() {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatalf("Error: %v", err)
+		log.Fatalf("Error while connecting to the client: %v", err)
 	}
 
 	// open up a connection
 	// from the client collect the database and chose the blog collection
 	// make it global
+	fmt.Println("Blog Service Started ...")
 	collection = client.Database("mydb").Collection("blog")
 
 	fmt.Print("Blog Server Started ...\n")
@@ -89,9 +91,12 @@ func main() {
 
 	// block until the signal is received
 	<-ch
-	fmt.Println("Stopping the server")
+	fmt.Println("Stopping the server ...")
 	s.Stop()
-	fmt.Println("Stopping the listener")
+	fmt.Println("Stopping the listener ...")
 	listener.Close()
+	fmt.Println("Closing MongoDB ...")
+	client.Disconnect(ctx)
+	fmt.Println("## End of the program ##")
 
 }
