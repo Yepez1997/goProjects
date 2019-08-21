@@ -10,13 +10,26 @@ import (
 	"time"
 
 	"github.com/Yepez1997/goProjects/src/gRPC/blog/blogpb"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 )
 
+// globally accesible collection
+var collection *mongo.Collection
+
 // all services - added on needed basis
 type server struct{}
+
+// blogItem api definition - goes along well with the protocal buffer message
+// TODO: look over primitive type
+type blogItem struct {
+	ID       primitive.ObjectID `bson:"_id, omitempty"`
+	AuthorID string
+	Title    string
+	Content  string
+}
 
 func main() {
 
@@ -33,6 +46,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
+
+	// open up a connection
+	// from the client collect the database and chose the blog collection
+	// make it global
+	collection = client.Database("mydb").Collection("blog")
 
 	fmt.Print("Blog Server Started ...\n")
 	// create connection; and port binding
