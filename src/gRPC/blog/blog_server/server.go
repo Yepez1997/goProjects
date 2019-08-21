@@ -1,14 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
+	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
 	"github.com/Yepez1997/goProjects/src/gRPC/blog/blogpb"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 )
 
@@ -20,13 +23,16 @@ func main() {
 	// get the  go code we get the file name and line number - if crashes
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-
-
+	// connectiing to mongodb; client represents a client object ot mongodb
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(
-	"mongodb+srv://<username>:<password>@<cluster-address>/test?w=majority"
-	))
-	if err != nil { log.Fatal(err) }
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
 
 	fmt.Print("Blog Server Started ...\n")
 	// create connection; and port binding
