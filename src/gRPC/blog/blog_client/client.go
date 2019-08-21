@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Client Starting on port 50052...")
+	fmt.Println("Client Starting on port 50051...")
 	// create a connection to the server
 	// by def grpc has ssl
 	// once going in to production - remove
@@ -21,7 +21,8 @@ func main() {
 	// 	return
 	// }
 	// cc, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
-	cc, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+	opts := grpc.WithInsecure()
+	cc, err := grpc.Dial("localhost:50051", opts)
 	if err != nil {
 		log.Fatalf("Could not connect: %v", err)
 		return
@@ -33,20 +34,18 @@ func main() {
 
 	//doUnaryCreateBlog(c)
 	fmt.Println("Starting to Create the Blog ...")
+	// create Blog
+	fmt.Println("Creating the blog")
 	blog := &blogpb.Blog{
-		AuthorId: "Jim",
-		Title:    "My Second Blog",
-		Content:  "Content Of My Second Blog",
+		AuthorId: "Yepez",
+		Title:    "My First Blog",
+		Content:  "Content of the first blog",
 	}
-
-	// unary api call to the server
-	res, err := c.CreateBlog(context.Background(), &blogpb.CreateBlogRequest{Blog: blog})
-
+	createBlogRes, err := c.CreateBlog(context.Background(), &blogpb.CreateBlogRequest{Blog: blog})
 	if err != nil {
-		fmt.Printf("Error from CreateBlog Client: %v", err)
+		log.Fatalf("Unexpected error: %v", err)
 	}
-	fmt.Printf("Response from CreateBlog Service: %v", res.GetBlog())
-	fmt.Println("Blog has been created ...")
+	fmt.Printf("Blog has been created: %v", createBlogRes)
 }
 
 // func doUnaryCreateBlog(c blogpb.BlogServiceClient) {

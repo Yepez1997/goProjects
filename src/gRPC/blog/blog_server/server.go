@@ -7,9 +7,9 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/Yepez1997/goProjects/src/gRPC/blog/blogpb"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -27,10 +27,10 @@ type server struct{}
 // blogItem api definition - goes along well with the protocal buffer message
 // TODO: look over primitive type
 type blogItem struct {
-	ID       primitive.ObjectID `bson:"_id, omitempty"`
-	AuthorID string             `bson:"_author_id"`
-	Title    string             `bson:"title"`
+	ID       primitive.ObjectID `bson:"_id,omitempty"`
+	AuthorID string             `bson:"author_id"`
 	Content  string             `bson:"content"`
+	Title    string             `bson:"title"`
 }
 
 // CreateBlog - BlogService unary rpc call
@@ -43,8 +43,9 @@ func (*server) CreateBlog(ctx context.Context, req *blogpb.CreateBlogRequest) (*
 		Title:    blog.GetTitle(),
 		Content:  blog.GetContent(),
 	}
-	// send the data to the mongo db and specify errors
+
 	res, err := collection.InsertOne(context.Background(), data)
+	// send the data to the mongo db and specify errors
 	if err != nil {
 		log.Fatalf("Error while inserting into the collection: %v", err)
 		return nil, status.Errorf(
@@ -73,49 +74,64 @@ func (*server) CreateBlog(ctx context.Context, req *blogpb.CreateBlogRequest) (*
 
 }
 
+// ReadBlog - gets the blog in the blog database
+func (*server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*blogpb.ReadBlogResponse, error) {
+	fmt.Println("Read Blog Request")
+	blogID := req.GetBlogId()
+	// check if object id is present
+	oid, err := primitive.ObjectIDFromHex(blogID)
+	if err != nil {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			fmt.Sprintf("Cannot Parse ID"),
+		)
+	}
+
+	// retrieve data from mongo db
+	data := &blogItem{}
+	// pass in the filter (look at documentation for this)
+	filter := bson.M{"_id": oid}
+	res := collection.FindOne(context.Background(), filter)
+	// reminds me of c
+	if err := res.Decode(data); err != nil {
+		return nil, status.Errorf(codes.NotFound,
+			fmt.Sprintf("Cannot find blog with the specified ID")
+		)
+	}
+
+}
+
 func main() {
 
 	// get the  go code we get the file name and line number - if crashes
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	// connectiing to mongodb; client represents a client object ot mongodb
-	fmt.Println("Connecting to MongoDB ...")
+	fmt.Println("Connecting to MongoDB")
+	// connect to MongoDB
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
-		log.Fatalf("Error: %v", err)
+		log.Fatal(err)
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
+	err = client.Connect(context.TODO())
 	if err != nil {
-		log.Fatalf("Error while connecting to the client: %v", err)
+		log.Fatal(err)
 	}
 
 	// open up a connection
 	// from the client collect the database and chose the blog collection
-	// make it global
 	fmt.Println("Blog Service Started ...")
 	collection = client.Database("mydb").Collection("blog")
 
 	fmt.Print("Blog Server Started ...\n")
 	// create connection; and port binding
-	listener, err := net.Listen("tcp", "0.0.0.0:50052")
+	listener, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-	// adding authentication
-	// server certificate
-	// certFile := "../../ssl/server.crt"
-	// // .pem file is a file grpc can read
-	// keyFile := "../../ssl/server.pem"
-	// cred, SSLerr := credentials.NewServerTLSFromFile(certFile, keyFile)
-	// if SSLerr != nil {
-	// 	fmt.Printf("Error loading credentials: %v", err)
-	// 	return
-	// }
-	// pass in the credentials to the grpc call
-	// grpc.Creds(cred)
 
-	s := grpc.NewServer()
+	opts := []grpc.ServerOption{}
+	s := grpc.NewServer(opts...)
 	// the path to the protocol buffer
 	blogpb.RegisterBlogServiceServer(s, &server{})
 
@@ -138,7 +154,7 @@ func main() {
 	fmt.Println("Stopping the listener ...")
 	listener.Close()
 	fmt.Println("Closing MongoDB ...")
-	client.Disconnect(ctx)
+	client.Disconnect(context.TODO())
 	fmt.Println("## End of the program ##")
 
 }
