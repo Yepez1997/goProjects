@@ -36,6 +36,7 @@ type blogItem struct {
 // CreateBlog - BlogService unary rpc call
 func (*server) CreateBlog(ctx context.Context, req *blogpb.CreateBlogRequest) (*blogpb.CreateBlogResponse, error) {
 	// get the data
+	fmt.Println("Creating Blog Request")
 	blog := req.GetBlog()
 	// create the data
 	data := blogItem{
@@ -100,6 +101,51 @@ func (*server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*blog
 	}
 
 	return &blogpb.ReadBlogResponse{
+		Blog: &blogpb.Blog{
+			Id:       data.ID.Hex(),
+			AuthorId: data.AuthorID,
+			Content:  data.Content,
+			Title:    data.Title,
+		},
+	}, nil
+
+}
+
+func (*server) UpdateBlog(ctx context.Context, req *blogpb.UpdateBlogRequest) (*blogpb.UpdateBlogResponse, error) {
+	fmt.Println("Updating Blog Request")
+	blog := req.GetBlog()
+	oid, err := primitive.ObjectIDFromHex(blog.GetId())
+	if err != nil {
+		return nil, status.Errorf(
+			codes.NotFound,
+			fmt.Sprintf("The blog was not found ..."),
+		)
+	}
+
+	data := &blogItem{}
+	filter := bson.M{"_id": oid}
+	res := collection.FindOne(context.Background(), filter)
+	// reminds me of c
+	if err := res.Decode(data); err != nil {
+		return nil, status.Errorf(codes.NotFound,
+			fmt.Sprintf("Cannot find blog with the specified ID"),
+		)
+	}
+
+	// update the responses i.e update the internal struct
+	data.AuthorID = blog.GetAuthorId()
+	data.Content = blog.GetContent()
+	data.Title = blog.GetTitle()
+
+	_, updateErr := collection.ReplaceOne(context.Background(), filter, data)
+	if updateErr != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Internal Error while Updating: %v", updateErr),
+		)
+	}
+
+	return &blogpb.UpdateBlogResponse{
 		Blog: &blogpb.Blog{
 			Id:       data.ID.Hex(),
 			AuthorId: data.AuthorID,
