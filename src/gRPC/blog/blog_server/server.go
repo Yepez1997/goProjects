@@ -14,6 +14,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // globally accesible collection
@@ -29,6 +31,46 @@ type blogItem struct {
 	AuthorID string             `bson:"_author_id"`
 	Title    string             `bson:"title"`
 	Content  string             `bson:"content"`
+}
+
+// CreateBlog - BlogService unary rpc call
+func (*server) CreateBlog(ctx context.Context, req *blogpb.CreateBlogRequest) (*blogpb.CreateBlogResponse, error) {
+	// get the data
+	blog := req.GetBlog()
+	// create the data
+	data := blogItem{
+		AuthorID: blog.GetAuthorId(),
+		Title:    blog.GetTitle(),
+		Content:  blog.GetContent(),
+	}
+	// send the data to the mongo db and specify errors
+	res, err := collection.InsertOne(context.Background(), data)
+	if err != nil {
+		log.Fatalf("Error while inserting into the collection: %v", err)
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Internal error: %v", err),
+		)
+	}
+
+	// cast the interface
+	oid, ok := res.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Cannot convert to OID"),
+		)
+	}
+
+	return &blogpb.CreateBlogResponse{
+		Blog: &blogpb.Blog{
+			Id:       oid.Hex(),
+			AuthorId: blog.GetAuthorId(),
+			Content:  blog.GetContent(),
+			Title:    blog.GetTitle(),
+		},
+	}, nil
+
 }
 
 func main() {
