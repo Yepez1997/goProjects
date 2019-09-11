@@ -8,22 +8,86 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-// Tutorial - in memory tutorial
+// Tutorial: in memory tutorial
 type Tutorial struct {
 	Title    string
 	Author   Author
 	Comments []Comment
 }
 
-// Author - author
+// Author: author
 type Author struct {
 	Name      string
 	Tutorials []int
 }
 
+// Comment: comment s
 type Comment struct {
 	Body string
 }
+
+// Populate: returns an arrat of Tutorials 
+func Populate() []Tutorial {
+	author := &Author{Name: "Elliot Forbes", Tutorials: []int{1}}
+	tutorial := Tutorial{
+		ID: 1,
+		Title: "Go GraphQL Tutorial",
+		Author: *author,
+		Comments: []Comment{
+			Comment{Body: "My first comment"},
+			Comment{Body: "My second comment"},
+		}
+	}
+	var tutorials []Tutorial
+	tutorials = append(tutorials, tutorial)
+	return tutorials
+}
+
+
+var commentType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "Comment",
+		Fields: graphql.Fields{
+			"body": &graphql.Field{
+				Type: graphql.String,
+			},
+		},
+	},
+)
+
+var authorType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "Author",
+		Fields: &graphql.Fields{
+			"Name": &graphql.Field{
+				Type: graphql.String,
+			},
+			"Tutorials": &graphql.Field{
+				Type: graphql.NewList(graphql.Int)
+			},
+		},
+	},
+)
+
+var tutorialType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "Tutorial",
+		Fields: &graphql.Fields{
+			"id": &graphql.Field{
+				Type: graphql.Int,
+			},
+			"title": &graphql.Field{
+				Type: graphql.String
+			},
+			"author": &graphql.Field{
+				Type: authorType,
+			},
+			"comments": &graphql.Field{
+				Type: graphql.NewList(commentType)
+			},
+		},
+	},
+)
 
 /*
 Simple GraphQL Server
@@ -37,6 +101,35 @@ func main() {
 				return "world", nil
 			},
 		},
+		"tutorial": &graphql.Field{
+			Type: tutorialType,
+			// good practice to add description
+			Description: "Get Tutorial By ID",
+			Args: graphql.FieldConfigArgument{
+				"id": &graphql.ArgumentConfig{
+					Type: graphql.Int,
+				},
+			}, Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				id, ok := p.Args["id"].(int)
+				if ok {
+					// parse tutorial for matching id 
+					for _, tutorial := range tutorials {
+						if int(tutorial.ID) == id {
+							return tutorial, nil 
+						}
+					}
+				}
+				return nil, nil
+			},
+		},
+		// list endpoint returns all tutorials
+		"list": &graphql.Field{
+			Type: graphql.NewList(tutorialType)
+			Description: "Get all tutorials",
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return tutorials, nil
+			}
+		}
 	}
 
 	rootQuery := graphql.ObjectConfig{Name: "RootQuery", Fields: fields}
