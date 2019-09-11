@@ -11,4 +11,6 @@ require (
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.1.0
 	google.golang.org/grpc v1.22.1
+	github.com/elliotforbes/go-graphql-tutorial
+
 )
