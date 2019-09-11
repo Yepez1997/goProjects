@@ -6,6 +6,8 @@ import (
 	"log"
 
 	"github.com/graphql-go/graphql"
+	// communicates with sqlite3 database
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // Tutorial: in memory tutorial
@@ -91,29 +93,29 @@ var tutorialType = graphql.NewObject(
 	},
 )
 
-// tutorials - Global Variable 
-tutorials []Tutorial = Populate()
+// tutorials - Global Variable
+var tutorials []Tutorial = Populate()
 
 var mutationType = graphql.NewObject(graphql.ObjectConfig{
-    Name: "Mutation",
-    Fields: graphql.Fields{
-        "create": &graphql.Field{
-            Type:        tutorialType,
-            Description: "Create a new Tutorial",
-            Args: graphql.FieldConfigArgument{
-                "title": &graphql.ArgumentConfig{
-                    Type: graphql.NewNonNull(graphql.String),
-                },
-            },
-            Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-                tutorial := Tutorial{
-                    Title: params.Args["title"].(string),
-                }
-                tutorials = append(tutorials, tutorial)
-                return tutorial, nil
-            },
-        },
-    },
+	Name: "Mutation",
+	Fields: graphql.Fields{
+		"create": &graphql.Field{
+			Type:        tutorialType,
+			Description: "Create a new Tutorial",
+			Args: graphql.FieldConfigArgument{
+				"title": &graphql.ArgumentConfig{
+					Type: graphql.NewNonNull(graphql.String),
+				},
+			},
+			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+				tutorial := Tutorial{
+					Title: params.Args["title"].(string),
+				}
+				tutorials = append(tutorials, tutorial)
+				return tutorial, nil
+			},
+		},
+	},
 })
 
 /*
@@ -155,26 +157,46 @@ func main() {
 
 	rootQuery := graphql.ObjectConfig{Name: "RootQuery", Fields: fields}
 	schemaConfig := graphql.SchemaConfig{
-		Query: graphql.NewObject(rootQuery),
-		Mutation: mutationType
+		Query:    graphql.NewObject(rootQuery),
+		Mutation: mutationType,
 	}
 	schema, err := graphql.NewSchema(schemaConfig)
 	if err != nil {
 		log.Fatalf("failed to create a schema, error: %v", err)
 	}
 
+	// query 1
+	// query := `
+	// 	{
+	// 		list {
+	// 			id
+	// 			title
+	// 			comments {
+	// 				body
+	// 			}
+	// 			author {
+	// 				Name
+	// 				Tutorials
+	// 			}
+	// 		}
+	// 	}
+	// `
+
+	// query2
+	// query := `
+	// 	mutation {
+	// 		create (title: "Hello World") {
+	// 			title
+	// 		}
+	// 	}
+	// `
+
+	// query3
 	query := `
-		{
+	 	{
 			list {
-				id
+				id 
 				title
-				comments {
-					body
-				}
-				author {
-					Name
-					Tutorials
-				}
 			}
 		}
 	`
