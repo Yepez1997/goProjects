@@ -91,13 +91,36 @@ var tutorialType = graphql.NewObject(
 	},
 )
 
+// tutorials - Global Variable 
+tutorials []Tutorial = Populate()
+
+var mutationType = graphql.NewObject(graphql.ObjectConfig{
+    Name: "Mutation",
+    Fields: graphql.Fields{
+        "create": &graphql.Field{
+            Type:        tutorialType,
+            Description: "Create a new Tutorial",
+            Args: graphql.FieldConfigArgument{
+                "title": &graphql.ArgumentConfig{
+                    Type: graphql.NewNonNull(graphql.String),
+                },
+            },
+            Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+                tutorial := Tutorial{
+                    Title: params.Args["title"].(string),
+                }
+                tutorials = append(tutorials, tutorial)
+                return tutorial, nil
+            },
+        },
+    },
+})
+
 /*
 Simple GraphQL Server
 */
 func main() {
 	// schema
-	tutorials := Populate()
-
 	fields := graphql.Fields{
 		"tutorial": &graphql.Field{
 			Type: tutorialType,
@@ -131,7 +154,10 @@ func main() {
 	}
 
 	rootQuery := graphql.ObjectConfig{Name: "RootQuery", Fields: fields}
-	schemaConfig := graphql.SchemaConfig{Query: graphql.NewObject(rootQuery)}
+	schemaConfig := graphql.SchemaConfig{
+		Query: graphql.NewObject(rootQuery),
+		Mutation: mutationType
+	}
 	schema, err := graphql.NewSchema(schemaConfig)
 	if err != nil {
 		log.Fatalf("failed to create a schema, error: %v", err)
