@@ -168,6 +168,7 @@ func main() {
 						fmt.Println(err)
 					}
 					log.Println(tutorial)
+					tutorials = append(tutorials, tutorial)
 				}
 				return tutorials , nil 
 			},
