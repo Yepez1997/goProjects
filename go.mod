@@ -6,6 +6,7 @@ require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gorilla/mux v1.7.3
 	github.com/graphql-go/graphql v0.7.8
+	github.com/mattn/go-sqlite3 v1.11.0
 	github.com/mongodb/mongo-go-driver v1.1.0 // indirect
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect

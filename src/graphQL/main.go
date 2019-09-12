@@ -148,9 +148,28 @@ func main() {
 		// list endpoint returns all tutorials
 		"list": &graphql.Field{
 			Type:        graphql.NewList(tutorialType),
-			Description: "Get all tutorials",
+			Description: "Get Tutorial List",
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return tutorials, nil
+				db, err := sql.Open("sqlite3", "./foo.db")
+				if err != nil {
+					log.Fatat(err)
+				}
+				defer db.Close()
+				var tutorials []Tutorial
+				results, err := db.Query("SELECT * FROM tutorials")
+				if err != nil {
+					fmt.Println(err)
+				}
+				// iterate through all the results 
+				for results.Next() {
+					var tutorial Tutorial 
+					err = results.Scane(&tutorial.ID, &tutorial.Title)
+					if err != nil {
+						fmt.Println(err)
+					}
+					log.Println(tutorial)
+				}
+				return tutorials , nil 
 			},
 		},
 	}
