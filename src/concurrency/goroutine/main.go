@@ -18,4 +18,8 @@ func main() {
 	// add go routines
 	go compute(10)
 	go compute(10)
+
+	// wait til finished
+	var input string
+	fmt.Scanln(&input)
 }
