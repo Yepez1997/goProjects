@@ -22,7 +22,7 @@ func randomInt(i int, intStream chan int, wg *sync.WaitGroup) {
 
 func main() {
 	var wg sync.WaitGroup // adding a wait group so that all go routines finish
-	intStream := make(chan int, 20)
+	intStream := make(chan int)
 
 	numberGoRoutines := 0
 	wg.Add(1)
@@ -46,21 +46,14 @@ func main() {
 		}
 		defer wg.Done()
 	}()
-	// close the int stream once all the go routines finished
-	// close(intStream)
-	// wg.Add(1)
-	// go func() {
-	// 	defer wg.Done()
-	// 	for val := range intStream {
-	// 		total += val
-	// 	}
-	// }()
 
+	go func() {
+		for val := range intStream {
+			total += val
+		}
+	}()
+	defer close(intStream)
 	wg.Wait()
-	close(intStream)
-	for val := range intStream {
-		total += val
-	}
 
 	fmt.Printf("Done with all %d go routines\n", numberGoRoutines)
 	fmt.Printf("Sum of all go routines -> %d\n", total)
