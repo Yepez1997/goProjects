@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+//TODO -- send the sum through a channel
+
 // random concurrency stuff to test out
 // channels
 // anonymous functions
