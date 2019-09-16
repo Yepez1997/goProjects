@@ -79,3 +79,8 @@ func main() {
 	}
 
 }
+
+// misc
+// pattern to channels
+// stages close theri outbound channels whe all the send operations are done
+// stages keep receiving values from inbound channels until those channels are closed
