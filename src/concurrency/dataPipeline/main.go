@@ -45,10 +45,15 @@ func sq(in <-chan int) <-chan int {
 // data pipelines and cancellation in go 
 func main() {
 	// set up the pipeline
-	c := gen(2,3)
-	out := sq(c)
-	fmt.Println(<-out)
-	fmt.Println(<-out)
+	// c := gen(2,3)
+	// out := sq(c)
+	// fmt.Println(<-out)
+	// fmt.Println(<-out)
+
+	// can combine as long as the same types exist for inbound and outbound channels 
+	for n := range sq(sq(gen(2,3))) {
+		fmt.Println(n)
+	}
 
 
 }
