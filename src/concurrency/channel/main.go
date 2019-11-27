@@ -8,10 +8,12 @@ import (
 
 // CalculateValue - send random value to the channel
 func CalculateValue(values chan int) {
-	value := rand.Intn(10)
+	min := 10
+	max := 30
+	value := rand.Intn(max-min) + min
 	fmt.Println("Calculated Random Value: {}", value)
 	// send to values
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(1500 * time.Millisecond)
 	values <- value
 	fmt.Println("Only executes after another goroutine performs a receive on the channel")
 }
