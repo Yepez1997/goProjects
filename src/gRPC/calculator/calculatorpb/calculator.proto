@@ -63,6 +63,12 @@ message SquareRootResponse {
 
 
 // Calculator Services 
+// first define services 
+    // after defining the services define teh response and request objects
+    // run the protoc command 
+    // write the code in the server file 
+        // check the types the function requests 
+        // depending whether the function requiers uni directional bi directional; etc types of requests.
 service CalculateService {
     // unary API call 
     rpc CalculateSum(CalculateRequest) returns (CalculateResponse) {};
