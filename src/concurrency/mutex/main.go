@@ -32,6 +32,15 @@ func withdraw(value int, done chan bool) {
 	done <- true
 }
 
+func depositAgain(value int, done chan bool) {
+	mutex.Lock()
+	fmt.Printf("Depositing %d from account with balance %d\n", value, balance)
+	balance += value
+	mutex.Unlock()
+	// signal the last done channel to stop
+	done <- true
+}
+
 // use mutex to prevent race conditions (overriding happens)
 // use go programs safely with mutex
 // mutex (mutual exclusion) prevent concurrent process from entering a critical section
@@ -44,8 +53,11 @@ func main() {
 	done := make(chan bool)
 	go withdraw(700, done)
 	go deposit(500, done)
+	go depositAgain(1000, done)
 	// alternative is to use a waitgroup
+	// these channels block until the last one is complete
 	<-done
 	<-done
-	fmt.Printf("New Balance %d\n", balance)
+	<-done
+	fmt.Printf("New Balance after two deposits %d\n", balance)
 }

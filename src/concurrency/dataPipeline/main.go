@@ -17,14 +17,23 @@ import "fmt"
 
 // first stage of the data pipeline
 // converts a list of integers to a channel and closes the channel once all the values have been sent
+// func gen(nums ...int) <-chan int {
+// 	out := make(chan int)
+// 	go func() {
+// 		for _, n := range nums {
+// 			out <- n
+// 		}
+// 		close(out)
+// 	}()
+// 	return out
+// }
+
 func gen(nums ...int) <-chan int {
-	out := make(chan int)
-	go func() {
-		for _, n := range nums {
-			out <- n
-		}
-		close(out)
-	}()
+	out := make(chan int, len(nums))
+	for _, n := range nums {
+		out <- n
+	}
+	close(out)
 	return out
 }
 

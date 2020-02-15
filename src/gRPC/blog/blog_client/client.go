@@ -32,9 +32,7 @@ func main() {
 
 	c := blogpb.NewBlogServiceClient(cc)
 
-	//doUnaryCreateBlog(c)
 	fmt.Println("Starting to Create the Blog ...")
-	// create Blog
 	fmt.Println("Creating the blog")
 	blog := &blogpb.Blog{
 		AuthorId: "Junior",
