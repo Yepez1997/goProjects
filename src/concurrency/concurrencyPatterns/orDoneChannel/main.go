@@ -10,6 +10,7 @@ import "fmt"
 func main() {
 
 	sig := func(after time.Duration) <-chan interface{} {
+		fmt.Printf("%v here sig\n", after)
 		c := make(chan interface{})
 		go func() {
 			defer close(c)
@@ -20,10 +21,13 @@ func main() {
 
 	var or func(channels ...<-chan interface{}) <-chan interface{}
 	or = func(channels ...<-chan interface{}) <-chan interface{} {
+		fmt.Printf("%d len \n", len(channels))
 		switch len(channels) {
 		case 0:
+			fmt.Println("HERE 2")
 			return nil
 		case 1:
+			fmt.Println("HERE")
 			return channels[0]
 		}
 
@@ -53,7 +57,7 @@ func main() {
 	<-or(
 		sig(2*time.Hour),
 		sig(5*time.Minute),
-		sig(1*time.Second),
+		sig(5*time.Second),
 		sig(1*time.Hour),
 		sig(1*time.Minute),
 	)
