@@ -18,6 +18,7 @@ import (
 
 // all services - added on needed basis
 type server struct{}
+type server2 struct{}
 
 // unary
 func (*server) Greet(ctx context.Context, req *greetpb.GreetingRequest) (*greetpb.GreetingResponse, error) {
@@ -41,34 +42,21 @@ func (*server) GreetGoodbye(ctx context.Context, req *greetpb.GreetingRequest) (
 	// create new protobuffer request
 	// ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	// defer cancel()
-	req := &greetpb.GoodbyeRequest{
+	req = &greetpb.GoodbyeRequest{
 		Result: firstName,
 	}
 
-	result = server.Goodbye(context.Background(), req)
-	return result, nil
+	result, err = (*server2).Goodbye(context.Background(), req)
+	return result, err
 }
 
-func (*server) Goodbye(ctx context.Context, req *greetpb.GoodbyeRequest) (*greetpb.GoodbyeResponse, error) {
+func (*server2) Goodbye(ctx context.Context, req *greetpb.GoodbyeRequest) (*greetpb.GoodbyeResponse, error) {
 	result := "Goodbye " + firstName
 	res := &greetpb.GoodbyeResponse{
 		Result: result,
 	}
 	return res
 
-}
-
-func (*server) Greet(ctx context.Context, req *greetpb.GreetingRequest) (*greetpb.GoodbyeResponse, error) {
-	// create a message that the function was invoked
-	fmt.Printf("Greet function was invoked with %v", req)
-	// in other words get te buffer bytes
-	firstName := req.GetGreeting().GetFirstName()
-	result := "Hello " + firstName
-	// create new protobuffer request
-	res := &greetpb.GreetingResponse{
-		Result: result,
-	}
-	return res, nil
 }
 
 // server streaming
@@ -187,8 +175,8 @@ func main() {
 	// pass in the credentials to the grpc call
 	s := grpc.NewServer(grpc.Creds(cred))
 	// the path to the protocol buffer
-	greetpb.RegisterGreetServiceServer(s, &server{})
-
+	//greetpb.RegisterGreetServiceServer(s, &server{})
+	greetpb.RegisterGoodbyeServiceServer(s, &server2{})
 	// adding reflection service to the server
 	//reflection.Register(s)
 

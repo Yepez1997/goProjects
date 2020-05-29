@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"greet/greetpb"
+	"github.com/Yepez1997/goProjects/src/gRPC/greet/greetpb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
