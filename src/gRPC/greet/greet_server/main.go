@@ -33,6 +33,44 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetingRequest) (*greetp
 	return res, nil
 }
 
+func (*server) GreetGoodbye(ctx context.Context, req *greetpb.GreetingRequest) (*greetpb.GoodbyeResponse, error) {
+	fmt.Printf("Greet function was invoked with %v", req)
+	// in other words get te buffer bytes
+	firstName := req.GetGreeting().GetFirstName()
+	result := "Hello " + firstName
+	// create new protobuffer request
+	// ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	// defer cancel()
+	req := &greetpb.GoodbyeRequest{
+		Result: firstName,
+	}
+
+	result = server.Goodbye(context.Background(), req)
+	return result, nil
+}
+
+func (*server) Goodbye(ctx context.Context, req *greetpb.GoodbyeRequest) (*greetpb.GoodbyeResponse, error) {
+	result := "Goodbye " + firstName
+	res := &greetpb.GoodbyeResponse{
+		Result: result,
+	}
+	return res
+
+}
+
+func (*server) Greet(ctx context.Context, req *greetpb.GreetingRequest) (*greetpb.GoodbyeResponse, error) {
+	// create a message that the function was invoked
+	fmt.Printf("Greet function was invoked with %v", req)
+	// in other words get te buffer bytes
+	firstName := req.GetGreeting().GetFirstName()
+	result := "Hello " + firstName
+	// create new protobuffer request
+	res := &greetpb.GreetingResponse{
+		Result: result,
+	}
+	return res, nil
+}
+
 // server streaming
 func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
 	// get the name

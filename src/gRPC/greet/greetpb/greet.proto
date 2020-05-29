@@ -1,6 +1,6 @@
 syntax = "proto3";
 package greet; 
-option go_package = "greetpb"; 
+option go_package = "greet/greetpb"; 
 
 
 message Greeting {
@@ -56,6 +56,16 @@ message GreetWithDeadlineResponse {
     string result = 1;
 }
 
+message GoodbyeResponse {
+    string result = 1;
+}
+
+
+message GoodbyeRequest {
+    string result = 1;
+}
+
+
 
 service GreetService {
 
@@ -74,4 +84,16 @@ service GreetService {
     // unary
     rpc GreetWithDeadline(GreetWithDeadlineRequest) returns (GreetWithDeadlineResponse) {}
 
+
+    // unary 
+    rpc GreetGoodbye(GreetingRequest) returns (GoodbyeResponse) {}
+
 }
+
+service GoodbyeService {
+
+    // unary 
+    rpc Goodbye(GoodbyeRequest) returns (GoodbyeResponse) {}
+
+}
+

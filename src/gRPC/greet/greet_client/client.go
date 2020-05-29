@@ -7,7 +7,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/Yepez1997/goProjects/src/gRPC/greet/greetpb"
+	"greet/greetpb"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -35,7 +36,8 @@ func main() {
 
 	c := greetpb.NewGreetServiceClient(cc)
 
-	doUnaryGreet(c)
+	// doUnaryGreet(c)
+	doUnaryGreetGoodbye(c)
 	// doServerStreaming(c)
 	// doClientStreaming(c)
 	// doBidirectionalStreaming(c)
